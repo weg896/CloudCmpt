@@ -22,16 +22,20 @@
 
     public void run(){
         try{
+            // wait for connection
             this.connectionSocket = serverSocket.accept();
             this.inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
             this.outToClient = new DataOutputStream(connectionSocket.getOutputStream());
             this.isConnection = true;
 
+            // prepare for next connection
             this.tempThread = new TCPConnectionListener(this.serverSocket);
 
+            // predefine 
             String clientSentence = "";
-            out
-
+            outToClient.writeBytes("welcome to Chat Hall!\n");
+            outToClient.writeBytes("welcome to Chat Hall!\n");
+            // communication
             while(true){
 
                 clientSentence = this.inFromClient.readLine();
@@ -71,7 +75,14 @@
     }
     
     public void helpMenu(){
-        String message = ""
+        try{
+            this.outToClient.writeBytes("you can type '-h' call help menu \n");
+            this.outToClient.writeBytes("you can type '-c chatRoomName' to create a chat room \n");
+            this.outToClient.writeBytes("you can type '-j chatRoomName' to enter or join a chat room \n");
+            this.outToClient.writeByte();
+        }catch(IOException e){
+
+        }
     }
 
  }
