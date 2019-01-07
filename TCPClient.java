@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.*;
 
-
 public class TCPClient {
 
 	private String userName = "";
@@ -29,7 +28,7 @@ public class TCPClient {
 		String modifiedSentence;
 		
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-		Socket clientSocket = new Socket("localhost",8080);
+		Socket clientSocket = new Socket(GlobalValue.DEFAULT_IP,GlobalValue.DEFAULT_PORT);
 		
 		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));

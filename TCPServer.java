@@ -1,27 +1,30 @@
 import java.io.*;
 import java.net.*;
+import java.lang.Thread;
 
 public class TCPServer {
 
 	private ServerSocket serverSocket = null;
-	private int connectedPort = -1;
 
-	public TCPServer(int port){
-		createServerSocket(port);
+	public TCPServer(){
+		createServerSocket();
 	}
 
-	public void createServerSocket(int port){
+	public void createServerSocket(){
 		if(null == this.serverSocket){
 			try{
-				this.serverSocket = new ServerSocket(port);
-				this.connectedPort = port;
+				this.serverSocket = new ServerSocket(GlobalValue.DEFAULT_PORT);
 			}catch(IOException e){
-				System.out.println("server creation (port:" + port + ")fail: "+e.toString());
+				System.out.println("server creation (port:" + GlobalValue.DEFAULT_PORT + ")fail: "+e.toString());
 				this.serverSocket = null;
-				this.connectedPort = -1;
 			}
 		}
 	}
+
+	public void listenToClient(){
+		
+	}
+
 
 	public void doConnunication(){
 		if(null != this.serverSocket){
@@ -48,14 +51,8 @@ public class TCPServer {
 				System.out.println("server close error: "+e.toString());
 			}finally{
 				this.serverSocket = null;
-				this.connectedPort = -1;
 			}
 		}
-	}
-
-
-	public int getSocketPort(){
-		return this.connectedPort;
 	}
 
 	public static void main(String[] args){
