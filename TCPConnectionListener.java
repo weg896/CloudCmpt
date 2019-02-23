@@ -33,8 +33,9 @@
 
             // predefine 
             String clientSentence = "";
-            outToClient.writeBytes("welcome to Chat Hall!\n");
-            outToClient.writeBytes("welcome to Chat Hall!\n");
+            this.outToClient.writeBytes("welcome to Chat Hall!\n");
+
+            this.helpMenu();
             // communication
             while(true){
 
@@ -56,14 +57,8 @@
         return this.isConnection;
     }
 
-	public void createChatRoom(){
-        TCPServer tempServer = null;
-        int newPort = this.CHAR_ROOM_OFFSET + this.chatRoomList.length;
-        tempServer = new TCPServer(newPort);
-	}
-
 	public void listChatRoom(){
-
+        try
 	}
 
 	public void joinChatRoom(){
@@ -79,8 +74,26 @@
             this.outToClient.writeBytes("you can type '-h' call help menu \n");
             this.outToClient.writeBytes("you can type '-c chatRoomName' to create a chat room \n");
             this.outToClient.writeBytes("you can type '-j chatRoomName' to enter or join a chat room \n");
-            this.outToClient.writeByte();
+            this.outToClient.writeBytes("you can type '-l' to list all chat room \n");
+            this.outToClient.writeBytes("you can type '-z' to leave chat room \n");
         }catch(IOException e){
+            this.connectionSocket = null;
+            this.serverSocket = null;
+            this.inFromClient = null;
+            this.outToClient = null;
+        }
+    }
+
+    public void brocastMessage(String message){
+        try{
+            this.outToClient.writeBytes(message); 
+        }catch(IOException e){
+
+        }
+    }
+
+    public int detectInputType(String message){
+        if(){
 
         }
     }

@@ -1,4 +1,5 @@
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Hashtable;;
 
 public class ChatMemberList{
@@ -17,10 +18,12 @@ public class ChatMemberList{
 
     public void brocastMessageToMember(String message){
         
-        Iterator<TCPConnectionListener> list_Iter = this.cmList.iterator();
+        Iterator<Entry<String,TCPConnectionListener>> list_Iter = this.cmList.entrySet().iterator();
   
         while(list_Iter.hasNext()){ 
             // send message to everyone
+            Entry<String,TCPConnectionListener> individualChatMember = list_Iter.next();
+            individualChatMember.getValue().brocastMessage(message);
         } 
     }
 
