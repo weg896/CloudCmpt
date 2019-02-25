@@ -5,38 +5,52 @@ public class TCPClient {
 
 	private String userName = "";
 
-	
-
-	public void createChatRoom(){
-
-	}
-
-	public void listChatRoom(){
-
-	}
-
-	public void joinChatRoom(){
-
-	}
-
-	public void leaveChatRoom(){
-
-	}
-
 	public static void main(String[] args) throws Exception{
-		String sentence;
-		String modifiedSentence;
-		
-		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-		Socket clientSocket = new Socket(GlobalValue.DEFAULT_IP,GlobalValue.DEFAULT_PORT);
-		
-		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-		
-		sentence = inFromUser.readLine();
-		outToServer.writeBytes(sentence + '\n');
-		modifiedSentence = inFromServer.readLine();
-		System.out.println("FROM SERVER: "+modifiedSentence);
-		clientSocket.close();
+		try{
+			String sentence;
+			String modifiedSentence;
+			
+			BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+			Socket clientSocket = new Socket(GlobalValue.DEFAULT_IP,GlobalValue.DEFAULT_PORT);
+			
+			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			
+
+			Thread tFromServer = new Thread(){
+				public void run(){
+					try{
+						String tempStr = "";
+						while(true){
+							tempStr = inFromServer.readLine();
+							System.out.println(tempStr);
+							if(tempStr.equals("System: Bye Bye!")){
+								clientSocket.close();
+								return;
+							}
+						}
+					}catch(IOException e){
+
+					}
+				}
+			};
+
+			tFromServer.start();
+
+			while(true){
+				sentence = inFromUser.readLine();
+				outToServer.writeBytes(sentence);
+
+				if(sentence.charAt(0) == '-'){
+					if(sentence.charAt(1) == 'h'){
+						break;
+					}
+				}
+				
+			}
+
+		}catch(IOException e){
+
+		}
 	}
 }

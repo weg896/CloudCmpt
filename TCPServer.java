@@ -10,6 +10,10 @@ public class TCPServer {
 		createServerSocket();
 	}
 
+	public ServerSocket getServerSocket(){
+		return this.serverSocket;
+	}
+
 	public void createServerSocket(){
 		if(null == this.serverSocket){
 			try{
@@ -20,11 +24,6 @@ public class TCPServer {
 			}
 		}
 	}
-
-	public void listenToClient(){
-		
-	}
-
 
 	public void doConnunication(){
 		if(null != this.serverSocket){
@@ -56,6 +55,11 @@ public class TCPServer {
 	}
 
 	public static void main(String[] args){
-	
+		System.out.println("system start");
+		TCPServer tcp = new TCPServer();
+
+		TCPConnectionListener listener = new TCPConnectionListener(tcp.getServerSocket());
+		listener.start();
+		
 	}
 }
