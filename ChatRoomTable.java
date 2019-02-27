@@ -24,12 +24,14 @@ public class ChatRoomTable{
     }
 
 
-    public void craeteChatRoom(String chatRoomName){
+    public boolean craeteChatRoom(String chatRoomName){
         ChatMemberList tempRoomTable = this.roomTable.get(chatRoomName);
         if(tempRoomTable == null){
             this.roomTable.put(chatRoomName, new ChatMemberList());
+            return true;
         }else{
             System.out.println("can not crate chat room '"+chatRoomName+"', exist already.");
+            return false;
         }
     }
 
@@ -65,11 +67,14 @@ public class ChatRoomTable{
     public String listAllChatRoom(){
         Iterator<Entry<String,ChatMemberList>> list_Iter = this.roomTable.entrySet().iterator();
     
-        String reStr="";
+        String reStr="CHat Room List -- \n";
         while(list_Iter.hasNext()){ 
             // send message to everyone
             Entry<String,ChatMemberList> individualChatMember = (Entry<String,ChatMemberList>)list_Iter.next();
             reStr += (String)individualChatMember.getKey() + "\n";
+        }
+        if(reStr.equals("")){
+            return "zero chat room exist";
         }
         return reStr;
     }

@@ -8,7 +8,6 @@ public class TCPClient {
 	public static void main(String[] args) throws Exception{
 		try{
 			String sentence;
-			String modifiedSentence;
 			
 			BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 			Socket clientSocket = new Socket(GlobalValue.DEFAULT_IP,GlobalValue.DEFAULT_PORT);
@@ -17,7 +16,7 @@ public class TCPClient {
 			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			
 
-			Thread tFromServer = new Thread(){
+			Thread listenFromServer = new Thread(){
 				public void run(){
 					try{
 						String tempStr = "";
@@ -30,16 +29,16 @@ public class TCPClient {
 							}
 						}
 					}catch(IOException e){
-
+						System.out.println("listenFromServer: "+e.getMessage());
 					}
 				}
 			};
 
-			tFromServer.start();
+			listenFromServer.start();
 
 			while(true){
 				sentence = inFromUser.readLine();
-				outToServer.writeBytes(sentence);
+				outToServer.writeBytes(sentence+'\n');
 
 				if(sentence.charAt(0) == '-'){
 					if(sentence.charAt(1) == 'h'){

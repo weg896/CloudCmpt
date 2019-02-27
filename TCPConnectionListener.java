@@ -9,7 +9,6 @@
  import java.net.*;
  import java.util.regex.Pattern;
  import java.util.regex.Matcher;
- import java.util.Map.Entry;
 
  public class TCPConnectionListener extends Thread{
     private Socket connectionSocket = null;
@@ -37,38 +36,37 @@
             this.tempThread = new TCPConnectionListener(this.serverSocket);
             this.tempThread.start();
         }catch(IOException e){
-
+            System.out.println("initialize: " + e.getMessage());
         }
+
         // predefine 
         String clientSentence = "";
         try{
-            this.outToClient.writeBytes("System: welcome to Chat Hall!\n");
-            this.outToClient.writeBytes("System: please tell us your name :\n");
+            this.outToClient.writeBytes("System: welcome to Chat Hall! \n");
+            this.outToClient.writeBytes("System: please tell us your name \n");
+            this.outToClient.writeBytes("System: name only contain letter and number and at least 2 character \n");
         }catch(IOException e){
-
+            System.out.println("welcome: " + e.getMessage());
         }
 
-        while(this.currentUserName == null){
-            System.out.println(" enter");
-            try{
+        try{
+            while(this.currentUserName == null){
                 String tempStr = this.inFromClient.readLine();
-                Pattern pattern = Pattern.compile("^[a-zA-Z0-9]+$");
+                Pattern pattern = Pattern.compile("[a-zA-Z0-9]{2}");
                 Matcher matcher = pattern.matcher(tempStr);
 
                 if (matcher.find()){
-                    this.currentUserName = matcher.group(1);
-                    System.out.println(this.currentUserName+" enter");
+                    this.currentUserName = matcher.group(0);
                     this.outToClient.writeBytes("System: hello "+ this.currentUserName +" \n");
                     break;
                 }else{
-                    this.outToClient.writeBytes("System: Could you choise a name only contain letter and number ?\n");
+                    this.outToClient.writeBytes("System: name only contain letter and number and at least 2 character \n");
                     this.outToClient.writeBytes("System: please tell us your name :\n");
                 }
-            }catch(IOException e){
-
             }
+        }catch(IOException e){
+            System.out.println("getUserName: " + e.getMessage());
         }
-
         this.helpMenu();
         // communication
         while(true){
@@ -84,10 +82,10 @@
                         this.helpMenu();
                         break;
                     case 2:
-                        this.createChatRoom(clientSentence.substring(3));
+                        this.createChatRoom(clientSentence);
                         break;
                     case 3:
-                        this.joinChatRoom(clientSentence.substring(3) );
+                        this.joinChatRoom(clientSentence);
                         break;
                     case 4:
                         this.listChatRoom();
@@ -98,15 +96,13 @@
                     case 6:
                         this.leaveAllChatRoom();
                         this.outToClient.writeBytes("System: Bye Bye!\n");
-                        this.outToClient.flush();
                         return;
                     default:
                         this.outToClient.writeBytes("System: errrr\n");
-                        this.outToClient.flush();
                         break;
                 }
             }catch(IOException e){
-            
+                System.out.println("infoConvert: " + e.getMessage());
             }
         }
     }
@@ -125,39 +121,73 @@
             this.outToClient.writeBytes("System: you can type '-x' to leave chat System \n"); //6
             this.outToClient.flush();
         }catch(IOException e){
-
+            System.out.println("help: " + e.getMessage());
         }
     }
 
-    public void createChatRoom(String chatRoomName){
-        ChatRoomTable.getChatRoomTable().craeteChatRoom(chatRoomName);
+    public void createChatRoom(String chatRoomTemp){
+        String chatRoom;
+        try{
+            if(chatRoomTemp.length() <=3) {
+                this.outToClient.writeBytes("System: Please type proper Chat Room name\n");
+            }else{
+                chatRoom = chatRoomTemp.substring(3);
+                boolean isSuccess = ChatRoomTable.getChatRoomTable().craeteChatRoom(chatRoom);
+                if(isSuccess){
+                    this.outToClient.writeBytes("System: chat room - " + chatRoom +" is created\n");
+                }else{
+                    this.outToClient.writeBytes("System: chat room - " + chatRoom +" is already existed\n");
+                }
+            }
+        }catch(IOException e){
+            System.out.println("createChatRoom: " + e.getMessage());
+        }
     }
 
 	public void listChatRoom(){
         String tempStr = ChatRoomTable.getChatRoomTable().listAllChatRoom();
         try{
-            this.outToClient.writeBytes(tempStr);
+            this.outToClient.writeBytes("System: " + tempStr+"\n");
         }catch(IOException e){
-            
+            System.out.println("listChatRoom: " + e.getMessage());
         }
 	}
 
-	public void joinChatRoom(String chatRoom){
-        if(this.currentChatRoom != null){
-            try{
-                this.outToClient.writeBytes("System: Please leave Chat Room First\n");
-                this.outToClient.flush();
-            }catch(IOException e){
-
+	public void joinChatRoom(String chatRoomTemp){
+        String chatRoom;
+        try{
+            if(chatRoomTemp.length() <=3) {
+                this.outToClient.writeBytes("System: Please type proper Chat Room name\n");
+            }else{
+                chatRoom = chatRoomTemp.substring(3);
+                if(this.currentChatRoom != null){
+                    this.outToClient.writeBytes("System: Please leave Chat Room First\n");
+                }else{
+                    ChatRoomTable.getChatRoomTable().joinChatRoom(chatRoom, this.currentUserName, this);
+                    this.currentChatRoom = chatRoom;
+                    this.brocastMessage("System: "+this.currentUserName+" join chat Room - " + chatRoom);
+                    this.outToClient.writeBytes("System: Welcome to Chat Room - " + chatRoom + "\n");
+                }
             }
+        }catch(IOException e){
+            System.out.println("joinChatRoom: " + e.getMessage());
         }
-        ChatRoomTable.getChatRoomTable().joinChatRoom(chatRoom, this.currentUserName, this);
-        this.currentChatRoom = chatRoom;
+        
 	}
 
 	public void leaveChatRoom(){
-        ChatRoomTable.getChatRoomTable().leaveChatRoom(this.currentChatRoom, this.currentUserName);
-        this.currentChatRoom = null;
+        try{
+            if(this.currentChatRoom == null){
+                this.outToClient.writeBytes("System: you are not in any chat room \n");
+            }else{
+                ChatRoomTable.getChatRoomTable().leaveChatRoom(this.currentChatRoom, this.currentUserName);
+                this.brocastMessage("System: "+this.currentUserName+" leave chat room - " + this.currentChatRoom);
+                this.outToClient.writeBytes("System: leave chat room" + this.currentChatRoom + "\n");
+                this.currentChatRoom = null;
+            }
+        }catch(IOException e){
+            System.out.println("leaveChatRoom: " + e.getMessage());
+        }
     }
 
     public void leaveAllChatRoom(){
@@ -171,9 +201,8 @@
         }
         try{
             this.outToClient.writeBytes(userName + "@" + this.currentChatRoom + ": " + message +'\n');
-            this.outToClient.flush();
         }catch(IOException e){
-
+            System.out.println("sendMessage: " + e.getMessage());
         }
     }
 
@@ -181,9 +210,8 @@
         if(this.currentChatRoom == null){
             try{
                 this.outToClient.writeBytes("System: Please join a Chat Room First\n");
-                this.outToClient.flush();
             }catch(IOException e){
-
+                System.out.println("brocastMessage: " + e.getMessage());
             }
         }else{
             ChatRoomTable.getChatRoomTable().sendMessageToChatRoom(this.currentChatRoom, message, this.currentUserName);

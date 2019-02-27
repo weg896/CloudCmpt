@@ -60,6 +60,6 @@ public class TCPServer {
 
 		TCPConnectionListener listener = new TCPConnectionListener(tcp.getServerSocket());
 		listener.start();
-		
+		System.out.println("system running");
 	}
 }
